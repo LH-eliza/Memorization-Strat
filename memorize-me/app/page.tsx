@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface LogicRule {
   name: string;
@@ -15,6 +15,27 @@ interface LogicalMistake {
   correction: string;
   explanation: string;
 }
+
+const SymbolButtons: React.FC<{
+  onSymbolClick: (symbol: string) => void;
+}> = ({ onSymbolClick }) => {
+  const symbols = ['→', '∧', '∨', '¬', '⊢', '∀', '∃', '≡'];
+  
+  return (
+    <div className="flex flex-wrap gap-2 mb-4">
+      {symbols.map((symbol) => (
+        <button
+          key={symbol}
+          type="button"
+          onClick={() => onSymbolClick(symbol)}
+          className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
+        >
+          {symbol}
+        </button>
+      ))}
+    </div>
+  );
+};
 
 const LogicPracticeApp: React.FC = () => {
   const logicRules: LogicRule[] = [
@@ -110,6 +131,7 @@ const LogicPracticeApp: React.FC = () => {
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
   const [mode, setMode] = useState('nameToRule');
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setCurrentRuleIndex(0);
@@ -187,6 +209,22 @@ const LogicPracticeApp: React.FC = () => {
     }
   };
 
+  const insertSymbol = (symbol: string): void => {
+    const input = inputRef.current;
+    if (!input) return;
+
+    const start = input.selectionStart || 0;
+    const end = input.selectionEnd || 0;
+    const newValue = userAnswer.substring(0, start) + symbol + userAnswer.substring(end);
+    setUserAnswer(newValue);
+
+    // Set cursor position after the inserted symbol
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(start + symbol.length, start + symbol.length);
+    }, 0);
+  };
+
   const renderQuestion = () => {
     if (mode === 'mistakes') {
       const currentMistake = commonMistakes[currentRuleIndex];
@@ -203,6 +241,7 @@ const LogicPracticeApp: React.FC = () => {
             </div>
           </div>
           <input
+            ref={inputRef}
             type="text"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
@@ -211,6 +250,7 @@ const LogicPracticeApp: React.FC = () => {
             className="w-full p-2 border rounded mb-4"
             disabled={showAnswer}
           />
+          {!showAnswer && <SymbolButtons onSymbolClick={insertSymbol} />}
         </div>
       );
     }
@@ -234,6 +274,7 @@ const LogicPracticeApp: React.FC = () => {
             </div>
           </div>
           <input
+            ref={inputRef}
             type="text"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
@@ -242,6 +283,7 @@ const LogicPracticeApp: React.FC = () => {
             className="w-full p-2 border rounded mb-4"
             disabled={showAnswer}
           />
+          {!showAnswer && <SymbolButtons onSymbolClick={insertSymbol} />}
         </div>
       );
     } else {
@@ -257,6 +299,7 @@ const LogicPracticeApp: React.FC = () => {
             </div>
           </div>
           <input
+            ref={inputRef}
             type="text"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
@@ -265,6 +308,7 @@ const LogicPracticeApp: React.FC = () => {
             className="w-full p-2 border rounded mb-4"
             disabled={showAnswer}
           />
+          {!showAnswer && <SymbolButtons onSymbolClick={insertSymbol} />}
         </div>
       );
     }
