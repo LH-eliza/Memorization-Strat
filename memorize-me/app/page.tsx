@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { playCorrectSound, playIncorrectSound } from './sounds';
 
 interface LogicRule {
   name: string;
@@ -34,6 +35,15 @@ const SymbolButtons: React.FC<{
         </button>
       ))}
     </div>
+  );
+};
+
+const SoundEffects: React.FC = () => {
+  return (
+    <>
+      <audio id="correct-sound" src="/sounds/correct.mp3" />
+      <audio id="incorrect-sound" src="/sounds/incorrect.mp3" />
+    </>
   );
 };
 
@@ -154,6 +164,14 @@ const LogicPracticeApp: React.FC = () => {
     setShowAnswer(false);
   };
 
+  const playSound = (isCorrect: boolean) => {
+    if (isCorrect) {
+      playCorrectSound();
+    } else {
+      playIncorrectSound();
+    }
+  };
+
   const handleSubmit = () => {
     let isCorrect = false;
     const items = mode === 'mistakes' ? commonMistakes : logicRules;
@@ -174,6 +192,7 @@ const LogicPracticeApp: React.FC = () => {
         : userAnswer.toLowerCase() === ruleItem.conclusion.toLowerCase();
     }
 
+    playSound(isCorrect);
     setQuestionsAnswered(questionsAnswered + 1);
     setProgressPercentage((questionsAnswered + 1) * (100 / 10));
 
@@ -316,6 +335,7 @@ const LogicPracticeApp: React.FC = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen p-4">
+      <SoundEffects />
       <div className="max-w-md mx-auto">
         <header className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Logic Rules Practice</h1>
